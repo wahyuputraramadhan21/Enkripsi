@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Enkripsi AES-256-GCM</title>
+  <style>
+    :root {
+      --bg: #f0f0f0;
+      --text: #111;
+      --input-bg: #fff;
+      --input-border: #ccc;
+      --button-bg: #007bff;
+      --button-text: #fff;
+    }
+
+    body.dark-mode {
+      --bg: #121212;
+      --text: #eee;
+      --input-bg: #1e1e1e;
+      --input-border: #444;
+      --button-bg: #1a73e8;
+      --button-text: #fff;
+    }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 1rem;
+      box-sizing: border-box;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 500px;
+      margin: auto;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 1.4rem;
+      margin-bottom: 1rem;
+    }
+
+    label {
+      display: block;
+      margin-top: 1rem;
+      margin-bottom: 0.3rem;
+      font-weight: 600;
+    }
+
+    input,
+    textarea {
+      width: 100%;
+      padding: 0.7rem;
+      border-radius: 6px;
+      border: 1px solid var(--input-border);
+      background: var(--input-bg);
+      color: var(--text);
+      font-size: 1rem;
+      box-sizing: border-box;
+    }
+
+    input::placeholder,
+    textarea::placeholder {
+      color: #888;
+    }
+
+    textarea {
+      resize: vertical;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    button {
+      flex: 1;
+      padding: 0.7rem;
+      border: none;
+      border-radius: 6px;
+      font-size: 1rem;
+      background-color: var(--button-bg);
+      color: var(--button-text);
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    .mode-toggle {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 1rem;
+    }
+
+    .mode-toggle button {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--text);
+      padding: 0.4rem 0.8rem;
+    }
+
+    @media (max-width: 600px) {
+      body {
+        padding: 0.8rem;
+      }
+
+      h1 {
+        font-size: 1.2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+<header>
+</header>
+  <div class="container">
+      <nav style="margin-bottom: 1rem;">
+    <a href="Enkripsi2.html">AES</a>
+    <a href="caesar.html">Caesar</a>
+  </nav>
+    <div class="mode-toggle">
+      <button onclick="toggleMode()">🌙 Toggle Mode</button>
+    </div>
+    <h1>🔐 Enkripsi AES-256-GCM</h1>
+
+    <label>Master Password:</label>
+    <input type="password" id="masterPassword" placeholder="Masukkan master password" />
+
+    <label>Data yang ingin dienkripsi:</label>
+    <input type="text" id="plainText" placeholder="Contoh: rahasia123" />
+
+    <div class="btn-row">
+      <button onclick="encrypt()">🔒 Enkripsi</button>
+      <button onclick="copyOutput()">📋 Salin Hasil</button>
+    </div>
+
+    <label>Hasil Enkripsi:</label>
+    <textarea id="encrypted" rows="4" readonly></textarea>
+
+    <label>Data untuk didekripsi:</label>
+    <textarea id="cipherText" rows="4" placeholder="Tempelkan hasil enkripsi..."></textarea>
+
+    <div class="btn-row">
+      <button onclick="decrypt()">🔓 Dekripsi</button>
+      <button onclick="copyDecrypted()">📋 Salin Dekripsi</button>
+    </div>
+
+    <label>Hasil Dekripsi:</label>
+    <textarea id="decrypted" rows="4" readonly></textarea>
+  </div>
+
+  <script>
+    async function getKey(masterPassword) {
+      const encoder = new TextEncoder();
+      const keyMaterial = await crypto.subtle.importKey(
+        'raw',
+        encoder.encode(masterPassword),
+        { name: 'PBKDF2' },
+        false,
+        ['deriveKey']
+      );
+
+      return crypto.subtle.deriveKey(
+        {
+          name: 'PBKDF2',
+          salt: encoder.encode('enkripsi-lokal'),
+          iterations: 100000,
+          hash: 'SHA-256'
+        },
+        keyMaterial,
+        { name: 'AES-GCM', length: 256 },
+        false,
+        ['encrypt', 'decrypt']
+      );
+    }
+
+    async function encrypt() {
+      const masterPassword = document.getElementById('masterPassword').value;
+      const plainText = document.getElementById('plainText').value;
+      const key = await getKey(masterPassword);
+      const iv = crypto.getRandomValues(new Uint8Array(12));
+
+      const encoded = new TextEncoder().encode(plainText);
+      const cipherBuffer = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, encoded);
+      const cipherArray = new Uint8Array(cipherBuffer);
+
+      const encryptedText = `${btoa(String.fromCharCode(...iv))}.${btoa(String.fromCharCode(...cipherArray))}`;
+      document.getElementById('encrypted').value = encryptedText;
+    }
+
+    async function decrypt() {
+      const masterPassword = document.getElementById('masterPassword').value;
+      const cipherInput = document.getElementById('cipherText').value;
+      const [ivBase64, cipherBase64] = cipherInput.split('.');
+
+      try {
+        const key = await getKey(masterPassword);
+        const iv = new Uint8Array(atob(ivBase64).split('').map(c => c.charCodeAt(0)));
+        const data = new Uint8Array(atob(cipherBase64).split('').map(c => c.charCodeAt(0)));
+        const decrypted = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, data);
+        const text = new TextDecoder().decode(decrypted);
+        document.getElementById('decrypted').value = text;
+      } catch (e) {
+        document.getElementById('decrypted').value = '❌ Gagal dekripsi: password salah atau data rusak';
+      }
+    }
+
+    function copyOutput() {
+      navigator.clipboard.writeText(document.getElementById('encrypted').value);
+    }
+
+    function copyDecrypted() {
+      navigator.clipboard.writeText(document.getElementById('decrypted').value);
+    }
+
+    function toggleMode() {
+      document.body.classList.toggle('dark-mode');
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>🔐 Caesar Cipher Tool</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 1rem;
+      background-color: #f4f4f4;
+      color: #111;
+      max-width: 600px;
+      margin: auto;
+      box-sizing: border-box;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    h2 {
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.nav-links a {
+  margin-right: 1rem;
+  text-decoration: none;
+  color: inherit;
+  font-weight: bold;
+}
+
+.toggle-mode {
+  background: none;
+  border: none;
+  font-size: 0.9rem;
+  cursor: pointer;
+  color: inherit;
+}
+
+    input, textarea, select, button {
+      width: 100%;
+      padding: 0.75rem;
+      margin-top: 0.5rem;
+      font-size: 1rem;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+    }
+
+    .result {
+      background-color: #f0f0f0;
+      padding: 0.75rem;
+      margin-top: 1rem;
+      white-space: pre-wrap;
+      border-radius: 5px;
+      font-size: 1rem;
+    }
+
+    button {
+      margin-top: 1rem;
+      cursor: pointer;
+    }
+
+    .toggle-mode {
+      float: right;
+      font-size: 0.9rem;
+      background: none;
+      border: none;
+      color: inherit;
+      cursor: pointer;
+    }
+
+    /* DARK MODE */
+    .dark-mode {
+      background-color: #121212;
+      color: #fff;
+    }
+
+    .dark-mode input,
+    .dark-mode textarea,
+    .dark-mode select {
+      background-color: #1e1e1e;
+      color: #fff;
+      border: 1px solid #444;
+    }
+
+    .dark-mode .result {
+      background-color: #2a2a2a;
+    }
+
+    .dark-mode input::placeholder,
+    .dark-mode textarea::placeholder {
+      color: #aaa;
+    }
+
+    @media (max-width: 600px) {
+      nav {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .toggle-mode {
+        float: none;
+        margin-top: 0.5rem;
+        align-self: flex-end;
+      }
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+  <div>
+    <a href="Enkripsi2.html">AES</a>
+    <a href="caesar.html">Caesar</a>
+  </div>
+  <button style="border: 1px solid #111;" class="toggle-mode" onclick="toggleMode()">🌙 Toggle Mode</button>
+
+  </nav>
+
+
+  <h2>🔐 Caesar Cipher</h2>
+
+  <label for="mode">Pilih Mode:</label>
+  <select id="mode">
+    <option value="encrypt">Enkripsi</option>
+    <option value="decrypt">Dekripsi</option>
+  </select>
+
+  <label for="shift">Shift (misal: 3 atau -2):</label>
+  <input type="number" id="shift" value="3" />
+
+  <label for="inputText">Masukkan Teks:</label>
+  <textarea id="inputText" rows="4" placeholder="Contoh: Halo Dunia!"></textarea>
+
+  <button onclick="runCaesar()">🔁 Proses</button>
+
+  <div class="result" id="outputText"></div>
+
+  <script>
+    function caesar(text, shift) {
+      let result = "";
+      for (let i = 0; i < text.length; i++) {
+        let code = text.charCodeAt(i);
+        let shifted = (code + shift + 256) % 256; // Full ASCII (0–255)
+        result += String.fromCharCode(shifted);
+      }
+      return result;
+    }
+
+    function runCaesar() {
+      const text = document.getElementById("inputText").value;
+      const shiftValue = parseInt(document.getElementById("shift").value);
+      const mode = document.getElementById("mode").value;
+      const shift = mode === "encrypt" ? shiftValue : -shiftValue;
+
+      const output = caesar(text, shift);
+      document.getElementById("outputText").textContent =
+        `Hasil (${mode === "encrypt" ? "Enkripsi" : "Dekripsi"}):\n${output}`;
+    }
+
+    function toggleMode() {
+      document.body.classList.toggle('dark-mode');
+    }
+  </script>
+</body>
+</html>
