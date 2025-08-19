@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>🔐 Caesar Cipher Tool by Wahyu</title>
+  <title>🔐 Caesar Cipher Tool</title>
   <style>
     body {
       font-family: sans-serif;
@@ -116,8 +116,8 @@
 <body>
   <nav class="navbar">
   <div>
-    <a href="https://wahyuputraramadhan21.github.io/Enkripsi/">AES</a>
-    <a href="Caesar.html">Caesar</a>
+    <a href="Enkripsi2.html">AES</a>
+    <a href="caesar.html">Caesar</a>
   </div>
   <button style="border: 1px solid #111;" class="toggle-mode" onclick="toggleMode()">🌙 Toggle Mode</button>
 
@@ -141,7 +141,7 @@
   <button onclick="runCaesar()">🔁 Proses</button>
 
   <div class="result" id="outputText"></div>
-  <p style="margin:auto;">Copyright Wahyu Putra</p>
+  <button onclick="copyResult()">📋 Salin Hasil</button>
 
   <script>
     function caesar(text, shift) {
@@ -168,6 +168,26 @@
     function toggleMode() {
       document.body.classList.toggle('dark-mode');
     }
+
+    function copyResult() {
+      const outputFull = document.getElementById("outputText").textContent;
+      // Ambil baris kedua setelah "Hasil..."
+      const output = outputFull.split("\n")[1] || "";
+
+      if (!output.trim()) {
+        alert("Tidak ada teks untuk disalin!");
+        return;
+      }
+
+      navigator.clipboard.writeText(output).then(() => {
+        alert("Teks hasil berhasil disalin ke clipboard!");
+      }).catch(err => {
+        alert("Gagal menyalin: " + err);
+      });
+    }
+
+
   </script>
 </body>
 </html>
+
